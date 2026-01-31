@@ -40,7 +40,7 @@ def main():
     log("Nav2 active.")
 
     # --- Define goal poses (edit coordinates to suit your map) ---
-    goal_pose1 = create_pose_stamped(nav, 8.0, 1.5, 1.57)
+    goal_pose1 = create_pose_stamped(nav, 6.5, 4.0, 1.57)
     goal_pose2 = create_pose_stamped(nav, -4.5, -3.0, 3.14)
     goal_pose3 = create_pose_stamped(nav, 0.3, 3.0, 0.0)
 
