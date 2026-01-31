@@ -1,9 +1,10 @@
-# 🤖 ROS2 Autonomous Navigation
+# 🤖 ROS2 Autonomous Navigation (Turtlebot3)
 
-[![ROS2](https://img.shields.io/badge/ROS2-Jazzy-blue?logo=ros)](https://docs.ros.org/en/jazzy/)
-[![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04-orange?logo=ubuntu)](https://ubuntu.com/)
-[![License](https://img.shields.io/badge/License-MIT-green?logo=opensourceinitiative)](LICENSE)
-[![Build](https://img.shields.io/badge/build-passing-brightgreen?logo=github)](.)
+![ROS2](https://img.shields.io/badge/ROS2-Jazzy-blue)
+![Nav2](https://img.shields.io/badge/Nav2-Stable-brightgreen)
+![Gazebo](https://img.shields.io/badge/Gazebo-Harmonic-green)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04-orange)
+![Python](https://img.shields.io/badge/Python-3.12-yellow)
 
 ---
 
@@ -24,7 +25,7 @@ Generated maps using both SLAM systems, executed single-goal and waypoint-based 
 
 ### 🗺️ Dual SLAM Implementation
 - SLAM Toolbox (online_async configuration)
-- Cartographer (map reused from prior work)
+- Cartographer
 
 ### 🧭 Nav2 Navigation
 - Single-goal navigation via RViz
@@ -121,32 +122,32 @@ Generated maps using both SLAM systems, executed single-goal and waypoint-based 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     Gazebo Simulation                       │
-│                  (turtlebot3_house.world)                   │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-                ┌───────────┴───────────┐
-                │                       │
-         ┌──────▼──────┐         ┌─────▼──────┐
-         │    SLAM     │         │    Nav2    │
-         │   Backend   │         │   Stack    │
-         │ SLAM Toolbox│         │  + AMCL    │
-         │ Cartographer│         │            │
-         └──────┬──────┘         └─────┬──────┘
-                │                      │
-                │    ┌─────────────────┘
-                │    │
-         ┌──────▼────▼──────┐
-         │   Visualization  │
-         │   - RViz2        │
-         │   - Foxglove     │
-         └──────────────────┘
-                │
-         ┌──────▼──────┐
-         │   rosbag2   │
-         │    (MCAP)   │
-         └─────────────┘
+                   ┌─────────────────────────────────────────────────────────────┐
+                   │                     Gazebo Simulation                       │
+                   │                  (turtlebot3_house.world)                   │
+                   └───────────────────────────┬─────────────────────────────────┘
+                                               │
+                                   ┌───────────┴───────────┐
+                                   │                       │
+                            ┌──────▼──────┐         ┌─────▼──────┐
+                            │    SLAM     │         │    Nav2    │
+                            │   Backend   │         │   Stack    │
+                            │ SLAM Toolbox│         │  + AMCL    │
+                            │ Cartographer│         │            │
+                            └──────┬──────┘         └─────┬──────┘
+                                   │                      │
+                                   │    ┌─────────────────┘
+                                   │    │
+                            ┌──────▼────▼──────┐
+                            │   Visualization  │
+                            │   - RViz2        │
+                            │   - Foxglove     │
+                            └──────────────────┘
+                                    │
+                             ┌──────▼──────┐
+                             │   rosbag2   │
+                             │    (MCAP)   │
+                             └─────────────┘
 ```
 
 **🔄 Data Flow:**
@@ -208,14 +209,14 @@ Generated maps using both SLAM systems, executed single-goal and waypoint-based 
 
 1️⃣ Build workspace
 ```bash
-cd /media/pritam/Home/tb3-nav2-slam-benchmark
+cd tb3-nav2-slam-benchmark
 colcon build --symlink-install
 source install/setup.bash
 ```
 
 2️⃣ Launch Gazebo + TurtleBot3
 ```bash
-export TURTLEBOT3_MODEL=wafflw
+export TURTLEBOT3_MODEL=waffle
 ros2 launch turtlebot3_gazebo turtlebot3_house.launch.py
 ```
 3️⃣ Launch SLAM Toolbox (new terminal)
@@ -285,18 +286,18 @@ tb3-nav2-slam-benchmark/
 
 | 📄 Document | 📝 Description |
 |------------|----------------|
-| [Setup Guide](docs/setup.md) | 🔧 Dependencies, workspace build |
-| [Run Commands](docs/runs.md) | ⚡ Copy-paste launch commands |
-| [Tuning Log](docs/tuning.md) | 🔬 Parameter experiments and results |
-| [Troubleshooting](docs/troubleshooting.md) | 🐛 Common issues |
-| [Metrics Template](docs/metrics.md) | 📊 Evaluation framework |
+| [Setup Guide](docs/setup.md) | Dependencies, workspace build |
+| [Run Commands](docs/runs.md) | Copy-paste launch commands |
+| [Tuning Log](docs/tuning.md) | Parameter experiments and results |
+| [Troubleshooting](docs/troubleshooting.md) | Common issues |
+| [Metrics Template](docs/metrics.md) | Evaluation framework |
 
 ---
 
 ## 🔄 Reproducibility
 
-✅ All maps, rosbags, and configuration files are version-controlled  
-📜 See [`scripts/quickstart.sh`](scripts/quickstart.sh) for automated demo
+- All maps, rosbags, and configuration files are version-controlled  
+- See [`scripts/quickstart.sh`](scripts/quickstart.sh) for automated demo
 
 ---
 
