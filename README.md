@@ -1,350 +1,241 @@
 # 🤖 ROS2 Autonomous Navigation (TurtleBot3)
 
-![ROS2](https://img.shields.io/badge/ROS2-Jazzy-blue)
+![ROS2 Jazzy](https://img.shields.io/badge/ROS2-Jazzy-blue)
 ![Nav2](https://img.shields.io/badge/Nav2-Stable-brightgreen)
-![Gazebo](https://img.shields.io/badge/Gazebo-Harmonic-green)
-![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04-orange)
-![Python](https://img.shields.io/badge/Python-3.12-yellow)
+![Gazebo Harmonic](https://img.shields.io/badge/Gazebo-Harmonic-green)
+![Python 3.12](https://img.shields.io/badge/Python-3.12-yellow)
 
 ---
 
 ## 📋 Overview
 
-Comparative benchmark of SLAM Toolbox and Cartographer integrated with Nav2 for autonomous navigation on TurtleBot3 Waffle in ROS2 Jazzy. Conducted systematic parameter tuning experiments documenting narrow-passage navigation challenges, discovering the "Letterbox Trap" phenomenon where geometric precision conflicted with navigational safety, and implemented an architectural waypoint decomposition solution achieving 100% success rate.
+Autonomous navigation project on TurtleBot3 Waffle in ROS2 Jazzy. Maps were generated using SLAM Toolbox (primary, recorded to rosbag2 MCAP) and Google Cartographer (monitored live via Foxglove). Single-goal and waypoint navigation via RViz confirmed the full stack was working before any constrained environments were attempted.
 
----
+A routine demo through a **0.81m narrow doorway** failed consistently. Seven systematic tests followed. Tests 01–05 tuned Nav2 parameters — none worked. Test 06 switched to a rectangular footprint and uncovered the **"Letterbox Trap"**: the planner routed through an unsafe gap it geometrically fit through.
 
-## ✨ Features
-
-**Dual SLAM Implementation**
-- SLAM Toolbox (online_async configuration)
-- Cartographer
-
-**Nav2 Navigation**
-- Single-goal navigation via RViz
-- Waypoint following using Simple Commander API
-- AMCL localization on pre-generated maps
-
-**Data Collection**
-- rosbag2 recordings (MCAP format)
-- RViz screenshots and screen recordings
-- Foxglove Studio visualization and logging
-
-**Systematic Parameter Tuning**
-- 7 sequential experiments documented
-- Inflation radius, DWB critics, AMCL precision
-- Robot geometry (radius vs. footprint)
-- Discovery of safety thresholds and geometric paradoxes
+Test 07 reverted to a circular `robot_radius: 0.15` and decomposed the mission into 4 waypoints via the Nav2 Simple Commander API (`waypoint_following/simple_commander_waypoints.py`). Result: **100% success, zero collisions**.
 
 ---
 
 ## 🖼️ Visual Proof
 
-### Mapping Phase
+### Nav2 Stack — How It's Wired
 
-<table>
-<tr>
-<td width="50%">
+The failure is a **DWB Controller**-layer problem: the global planner finds a route, but the local planner can't execute it safely.
 
-#### Gazebo House Environment
-![Gazebo House](results/screenshots/Slam_toolbox/gazebo_house.png)
-*Simulated residential environment with narrow doorway constraint*
-
-</td>
-<td width="50%">
-
-#### SLAM Toolbox Mapping
-![SLAM Mapping](results/screenshots/Slam_toolbox/rviz_slam_map.png)
-*Real-time SLAM map generation in RViz*
-
-</td>
-</tr>
-</table>
-
-### Navigation Phase
-
-<table>
-<tr>
-<td width="50%">
-
-#### Nav2 Path Planning
-![Path Planning](results/screenshots/Slam_toolbox/nav2_path_costmap.png)
-*Global and local costmaps with planned path*
-
-</td>
-<td width="50%">
-
-#### Waypoint Navigation
-![Waypoints](results/screenshots/Slam_toolbox/waypoints_rviz.png)
-*Multi-waypoint mission execution*
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td width="50%">
-
-#### Cartographer Navigation
-![Cartographer Nav](results/screenshots/Cartographer/nav2_goal_cartographer.png)
-*Nav2 goal navigation on Cartographer-generated map*
-
-</td>
-<td width="50%">
-
-#### Foxglove Dashboard
-![Foxglove](results/screenshots/Cartographer/foxglove_dashboard.png)
-*3D map, TF tree, velocity plots, pose data, logs*
-
-</td>
-</tr>
-</table>
-
-### Video Demonstrations
-
-| Demo | Description | Content |
-|------|-------------|---------|
-| [Nav2 RViz Goals](results/videos/Slam_toolbox/nav2_rviz_goals.mp4) | Single-goal navigation | SLAM Toolbox map with live planning |
-| [Waypoint Following](results/videos/Slam_toolbox/simple_commander_waypoints.mp4) | Programmatic navigation | Simple Commander API execution |
-| [Foxglove Monitoring](results/videos/Cartographer/simple_commander_foxglove.mp4) | Telemetry dashboard | Cartographer map with live metrics |
+```
+┌─────────────────────────────────────────────────────┐
+│                  Gazebo Simulation                   │
+│             (turtlebot3_house.world)                 │
+└───────────────────────┬─────────────────────────────┘
+                        │  /scan, /odom, /cmd_vel
+                        ▼
+          ┌─────────────────────────┐
+          │        Nav2 Stack       │
+          │                         │
+          │  ┌─────────────────┐    │
+          │  │  AMCL           │    │  ← Localization: "Where am I?"
+          │  │  (localization) │    │     /map + /scan  →  /amcl_pose
+          │  └────────┬────────┘    │
+          │           ▼             │
+          │  ┌─────────────────┐    │
+          │  │  Global Planner │    │  ← Planning: "What's the full route?"
+          │  │  (costmap +     │    │     /map  →  /plan
+          │  │   path search)  │    │
+          │  └────────┬────────┘    │
+          │           ▼             │
+          │  ┌─────────────────┐    │
+          │  │  DWB Controller │◄───┼── ⚠️  Failure point: can't execute
+          │  │  (local planner)│    │     /local_costmap → /local_plan → /cmd_vel
+          │  └─────────────────┘    │
+          └─────────────────────────┘
+                        │
+                        ▼
+              ┌───────────────┐
+              │  Visualization│
+              │  RViz / Foxglove
+              └───────────────┘
+```
 
 ---
 
-## 🏗️ Architecture
+### 1. Mapping — The Foundation
 
-```
-                   ┌─────────────────────────────────────────────────────────────┐
-                   │                     Gazebo Simulation                       │
-                   │                  (turtlebot3_house.world)                   │
-                   └───────────────────────────┬─────────────────────────────────┘
-                                               │
-                                   ┌───────────┴───────────┐
-                                   │                       │
-                            ┌──────▼──────┐         ┌─────▼──────┐
-                            │    SLAM     │         │    Nav2    │
-                            │   Backend   │         │   Stack    │
-                            │ SLAM Toolbox│         │  + AMCL    │
-                            │ Cartographer│         │            │
-                            └──────┬──────┘         └─────┬──────┘
-                                   │                      │
-                                   │    ┌─────────────────┘
-                                   │    │
-                            ┌──────▼────▼──────┐
-                            │   Visualization  │
-                            │   - RViz2        │
-                            │   - Foxglove     │
-                            └──────────────────┘
-                                    │
-                             ┌──────▼──────┐
-                             │   rosbag2   │
-                             │    (MCAP)   │
-                             └─────────────┘
-```
+#### SLAM Toolbox Map
 
-**Data Flow:**
-1. Mapping: Gazebo → SLAM Backend → Map (PGM/YAML)
-2. Navigation: Map + Goal → Nav2 Planner → Controller → /cmd_vel → Gazebo
-3. Monitoring: Topics → RViz/Foxglove + rosbag2 recording
+![SLAM Toolbox Map](results/screenshots/maps/slam_toolbox_map.png)
+
+*SLAM Toolbox occupancy grid. Used for all Nav2 tests.*
+
+#### Cartographer Map
+
+![Cartographer Map](results/screenshots/maps/cartographer_map.png)
+
+*Cartographer occupancy grid. Learning exercise only.*
+
+#### Foxglove Live Dashboard — Cartographer Map Run
+
+![Foxglove Live Cartographer](results/screenshots/foxglove/cartographer_waypoint_live.png)
+
+*Foxglove live dashboard during Cartographe map Nav2 Waypoiny follower goals(using RViz). Panels: 3D map, TF tree, velocity plots.*
+
+#### Foxglove rosbag2 Visualization — SLAM Map run
+
+![Foxglove Slam rosbag2](results/screenshots/foxglove/slam_rosbag2.png)
+
+*Foxglove rosbag2 visalization for SLAM Map using topics /aml_pose, global_costmap/costmap, local_costmap/costmap, /map, /scan, /local_plan, /plan.*
 
 ---
 
-## 📊 Results Summary
+### 2. Initial Validation — Nav2 Goals and Waypoints via RViz
 
-| SLAM Backend | Map Quality | Nav2 Integration | Doorway Handling | Recorded Runs |
-|--------------|-------------|------------------|------------------|---------------|
-| SLAM Toolbox | Complete | Stable | Requires waypoint strategy | 2 rosbags |
-| Cartographer | Complete | Stable | Requires waypoint strategy | 2 rosbags |
+#### Single Goal — Nav2 Goal (RViz)
 
-**Qualitative Observations:**
-- Both backends produced navigable maps
-- Nav2 path planning succeeded in open areas
-- Narrow doorway (0.81m) triggered recovery behaviors before aborting
-- Waypoint decomposition strategy achieved 100% success rate
-- AMCL localization remained stable throughout missions
+![Single Goal RViz](results/screenshots/nav2/single_goal_rviz.png)
 
----
+*Single goal set via 2D Goal Pose in RViz. Robot reaches it without hesitation.*
 
-## ⚠️ Engineering Challenges
+#### Waypoint Following — RViz Waypoint Mode
 
-### Narrow Doorway Navigation & The Letterbox Trap
+![RViz Waypoint Following](results/screenshots/nav2/rviz_waypoint_following.png)
 
-**Physical Constraint:** 0.81m doorway width with adjacent letterbox obstacle vs. TurtleBot3 Waffle (306mm width) + inflation
-
-**Systematic Testing** (7 experiments documented in [`docs/tuning.md`](docs/tuning.md)):
-
-| Test | Key Parameters | Outcome | Discovery |
-|------|----------------|---------|-----------|
-| 01–04 | Inflation, DWB critics, AMCL tuning | Failed | Parameter tuning hit diminishing returns |
-| 05 | `robot_radius: 0.13` | Collision | Values < 0.15m unsafe for Waffle |
-| 06 | Rectangular footprint `[0.21, 0.165]` | "Letterbox Trap" | Precision invited unsafe gap planning |
-| 07 | `robot_radius: 0.15` + Waypoint Decomposition | 100% success | Architectural solution over parameter tuning |
-
-**The Letterbox Trap Discovery:**
-
-When using an accurate rectangular footprint (Test 06), the Nav2 global planner identified a "theoretically valid" path through a ~0.2m gap between a letterbox and the wall. The robot confidently approached this gap, detected collision risk at the threshold, and entered an abort loop after approaching within 2cm of the obstacle.
-
-> **Key Insight:**
-> 
-> ### Geometric precision ≠ Navigational safety
-
-An accurate footprint representation invites the planner to explore every theoretically possible gap, including those unsafe for:
-- Sensor coverage limitations
-- Wheel slippage near obstacles  
-- Odometry drift during tight maneuvers
-
-**Final Solution: Waypoint Decomposition Strategy**
-
-Rather than aggressive parameter tuning (which degraded open-area navigation), implemented a mission-level architectural approach:
-
-Conservative Parameters:
-```yaml
-robot_radius: 0.15        # Circular buffer excludes tiny gaps
-inflation_radius: 0.28
-BaseObstacle.scale: 0.08  # Higher safety margin
-```
-
-Staged Waypoint Navigation:
-```python
-waypoints = [
-    (4.5, 5.3, 1.57),  # WP1: Align before doorway
-    (3.0, 2.5, 1.57),  # WP2: Interior room goal
-    (4.5, 5.3, 1.57),  # WP3: Exit alignment  
-    (0.3, 3.0, 0.0)    # WP4: Return to origin
-]
-```
-
-Results:
-- 4/4 waypoints reached (100% success rate)
-- 0 collisions during doorway traversal
-- Baseline parameters preserved (safe for all environments)
-- Repeatable across multiple runs
-
-Safety Thresholds Identified:
-- `robot_radius < 0.15m` → Physical collisions (Test 05)
-- Rectangular footprint → Letterbox trap (Test 06)
-- Aggressive critic weights → Degrades open-area navigation
-
-Complete experimental log with parameter diffs and architectural rationale: [`docs/tuning.md`](docs/tuning.md)
+*Waypoint sequence set via Nav2 Waypoint Mode in RViz. Every waypoint reached, no recovery behaviors triggered.*
 
 ---
 
-## 🚀 Quickstart
+### 3. The Failure — The Letterbox Trap (Test 06)
 
-Build workspace:
+Tests 01–05 tuned parameters. None worked. Test 06 switched to a rectangular footprint `[0.21, 0.165]` — the planner found a gap it geometrically fit through, but the local planner couldn't execute it safely. Goal aborted.
+
+![Letterbox Trap](results/screenshots/tuning/letterbox_trap.png)
+
+*Test 06: rectangular footprint caused the planner to route through an unsafe gap near a letterbox — the "Letterbox Trap." Full breakdown in [`docs/tuning.md`](docs/tuning.md).*
+
+---
+
+### 4. The Solution — 4-Waypoint Mission (Test 07)
+
+The rectangular footprint was removed, `robot_radius: 0.15` restored — letterbox gap gone from the costmap. The mission was then decomposed into 4 waypoints via the Nav2 Simple Commander API. Each waypoint is a short, straight-line segment the planner can always handle.
+
+![Waypoint Mission Plan](results/screenshots/nav2/waypoint_mission_path.png)
+
+*Test 07: all 4 waypoints visible in RViz. Path enters the doorway straight and centered. Every waypoint reached.*
+
+#### Demo Video
+
+*📹 Placeholder — full run video to be added here.*
+
+#### Test 07 Result
+
+![Test 07 Result](results/screenshots/nav2/test07_success.png)
+
+*Placeholder — completed mission state in RViz.*
+
+---
+
+## ⚙️ Engineering Journey
+
+| Phase | What Was Tried | Result | Why It Matters |
+|---|---|---|---|
+| Initial Validation | Single-goal and RViz waypoint navigation on both SLAM Toolbox and Cartographer maps | All passed | Confirmed the full stack (SLAM → AMCL → Nav2) worked correctly in open areas |
+| Tests 01–05 | Tuned inflation radius, cost scaling, DWB critics, AMCL noise, reduced robot radius to 0.13 | All failed | Parameter tuning cannot create a valid path where geometry forbids one |
+| Test 06 | Switched to precise rectangular footprint `[0.21, 0.165]` | Letterbox Trap | The planner exploited a ~0.2m gap the robot couldn't safely traverse |
+| Test 07 | Reverted to circular `robot_radius: 0.15` + 4-waypoint script | **100% success** | Mission-level decomposition solved what local planner tuning could not |
+
+---
+
+## 🚀 How to Run
+
+**Step 1 — Launch Gazebo:**
 ```bash
-cd tb3-nav2-slam-benchmark
-colcon build --symlink-install
-source install/setup.bash
-```
-
-Launch Gazebo + TurtleBot3:
-```bash
-export TURTLEBOT3_MODEL=waffle
 ros2 launch turtlebot3_gazebo turtlebot3_house.launch.py
 ```
 
-Launch SLAM Toolbox (new terminal):
+**Step 2 — Generate the map with SLAM Toolbox:**
 ```bash
-ros2 launch slam_toolbox online_async_launch.py \
-  params_file:=./config/slam_toolbox/online_async_stable.yaml
+ros2 launch slam_toolbox online_sync_launch.py use_sim_time:=True
+```
+Drive the robot around until the map is complete. Save it:
+```bash
+ros2 run slam_toolbox lifelong_slam_toolbox --ros-args -p save_map:=results/maps/house_slam_toolbox_draft
 ```
 
-Launch Nav2 on saved map (new terminal):
+> **Optional:** Cartographer can also map the same environment. See [`docs/runs.md`](docs/runs.md) for the launch command.
+
+**Step 3 — Launch Nav2 with the SLAM Toolbox map:**
 ```bash
 ros2 launch nav2_bringup bringup_launch.py \
-  map:=./results/maps/house_slam_toolbox_draft.yaml
+  use_sim_time:=True \
+  map:=results/maps/house_slam_toolbox_draft.yaml \
+  params_file:=$(ros2 pkg prefix turtlebot3_navigation2)/share/turtlebot3_navigation2/param/waffle.yaml
 ```
 
-Open RViz (new terminal):
+**Step 4 — Run the 4-waypoint mission:**
 ```bash
-ros2 run rviz2 rviz2 -d ./config/rviz/slam_mapping.rviz
+python3 waypoint_following/simple_commander_waypoints.py
 ```
 
-Record mission (optional):
-```bash
-ros2 bag record -o mission_run /tf /cmd_vel /scan /amcl_pose
-```
+Waypoints:
 
-See [`docs/runs.md`](docs/runs.md) for complete command reference.
+| Waypoint | x | y | yaw | Role |
+|---|---|---|---|---|
+| WP1 | 4.5 | 5.3 | 1.57 | Stage perpendicular to doorway |
+| WP2 | 3.0 | 2.5 | 1.57 | Straight through doorway into room |
+| WP3 | 4.5 | 5.3 | 1.57 | Return to doorway |
+| WP4 | 0.3 | 3.0 | 0.0 | Back to home base |
+
+Full launch details and monitoring setup: [`docs/runs.md`](docs/runs.md)
 
 ---
 
-## 📁 Repository Structure
+## 📁 Directory Structure
 
 ```
-tb3-nav2-slam-benchmark/
-├── config/                  # ROS2 config files
-│   ├── slam_toolbox/        # SLAM params
-│   ├── cartographer/        # Cartographer params
-│   ├── nav2/                # Nav2 tuning experiments
-│   └── rviz/                # RViz configs
-├── docs/                    # Documentation
-│   ├── setup.md             # Environment setup
-│   ├── runs.md              # Run commands
-│   ├── tuning.md            # 7-test experimental log
-│   ├── troubleshooting.md
-│   └── metrics.md           # Evaluation templates
+ros2-turtlebot3-navigation/
+├── config/
+│   ├── slam_toolbox/            # SLAM Toolbox parameters
+│   ├── cartographer/            # Cartographer parameters
+│   ├── nav2/                    # Nav2 params (one file per test)
+│   └── rviz/                    # RViz configurations
+├── docs/
+│   ├── setup.md                 # Environment & dependency setup
+│   ├── runs.md                  # Launch sequence & monitoring
+│   ├── tuning.md                # 7-test engineering log
+│   └── troubleshooting.md       # Common issues & fixes
 ├── results/
-│   ├── maps/                # PGM + YAML maps
-│   ├── rosbags/             # MCAP recordings
-│   ├── screenshots/         # RViz + Foxglove
-│   └── videos/              # Screen recordings
-├── scripts/                 # Automation scripts
-└── waypoint_following/      # Simple Commander API
+│   ├── maps/                    # Generated maps (PGM + YAML)
+│   ├── rosbags/                 # MCAP recordings (SLAM Toolbox & Nav2)
+│   └── screenshots/             # Visual proof
+│       ├── maps/                # SLAM comparison screenshots
+│       ├── tuning/              # Test result screenshots (letterbox trap)
+│       ├── nav2/                # Navigation screenshots (goals, waypoints, solution)
+│       └── foxglove/            # Foxglove dashboard screenshots
+└── waypoint_following/
+    └── simple_commander_waypoints.py   # 4-waypoint mission script
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack & Credits
 
-| Component | Technology |
-|-----------|-----------|
-| OS | Ubuntu 24.04 |
-| ROS2 | Jazzy Jalisco |
-| Robot | TurtleBot3 Waffle |
-| SLAM | SLAM Toolbox, Cartographer |
-| Navigation | Nav2, AMCL |
-| Visualization | RViz2, Foxglove Studio |
-| Recording | rosbag2 (MCAP) |
+| Technology | Role in This Project |
+|---|---|
+| **ROS2 Jazzy** | Robot middleware & communication layer |
+| **Nav2** | Navigation stack (planning, control, AMCL localization) |
+| **SLAM Toolbox** | Primary SLAM backend — map used for all navigation tests |
+| **Google Cartographer** | Secondary SLAM backend — map generated for learning |
+| **Gazebo Harmonic** | Physics simulation (TurtleBot3 house world) |
+| **Foxglove Studio** | Live dashboard during the Cartographer mapping run |
+| **rosbag2 / MCAP** | Data recording for SLAM Toolbox & Nav2 runs |
+| **Python 3.12** | Waypoint mission script (Nav2 Simple Commander API) |
 
----
-
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Setup Guide](docs/setup.md) | Dependencies, workspace build |
-| [Run Commands](docs/runs.md) | Copy-paste launch commands |
-| [Tuning Log](docs/tuning.md) | 7-test experimental log with Letterbox Trap analysis |
-| [Troubleshooting](docs/troubleshooting.md) | Common issues |
-| [Metrics Template](docs/metrics.md) | Evaluation framework |
+**Credits:** TurtleBot3 platform by [ROBOTIS](https://www.robotis.com). Nav2 by [Open Navigation](https://nav2.org). SLAM Toolbox by Steve Macenski. Cartographer by Google.
 
 ---
 
-## 🔄 Reproducibility
-
-All maps, rosbags, and configuration files are version-controlled. See [`scripts/quickstart.sh`](scripts/quickstart.sh) for automated demo.
-
----
-
-## 📜 License
-Apache-2.0
-
----
-
-## 🙏 Acknowledgments
-
-- TurtleBot3 navigation stack: ROBOTIS
-- Nav2 framework: Open Navigation LLC
-- SLAM implementations: Steve Macenski (SLAM Toolbox), Google (Cartographer)
-
----
-
-<div align="center">
-
-Star this repo if you find it useful
-
-[Open an Issue](../../issues) · [Submit a PR](../../pulls)
-
-</div>
+| Document | What's Inside |
+|---|---|
+| [`docs/setup.md`](docs/setup.md) | Install dependencies, build workspace |
+| [`docs/runs.md`](docs/runs.md) | 4-step launch sequence + monitoring explained |
+| [`docs/tuning.md`](docs/tuning.md) | Full 7-test log: the problem, the trap, the fix |
+| [`docs/troubleshooting.md`](docs/troubleshooting.md) | Common issues & diagnostic commands |
