@@ -46,7 +46,7 @@ The failure is a **DWB Controller**-layer problem: the global planner finds a ro
                                      │           ▼             │
                                      │  ┌─────────────────┐    │
                                      │  │  DWB Controller │◄───┼── ⚠️  Failure point: can't execute
-                                     │  │  (local planner)│    │     /local_costmap → /local_plan → cmd_vel  
+                                     │  │  (local planner)│    │     /local_costmap → /local_plan → cmd_vel
                                      │  └─────────────────┘    │
                                      └─────────────────────────┘
                                                  │
@@ -77,13 +77,13 @@ The failure is a **DWB Controller**-layer problem: the global planner finds a ro
 
 ![Foxglove Live Cartographer](results/screenshots/foxglove/cartographer_waypoint_live.png)
 
-*Foxglove live dashboard during Cartographe map Nav2 Waypoiny follower goals(using RViz). Panels: 3D map, TF tree, velocity plots.*
+*Foxglove live dashboard during Cartographer map using Nav2 Waypoint follower goals (RViz). Panels: 3D map, TF tree, velocity plots.*
 
 #### Foxglove rosbag2 Visualization — SLAM Map run
 
 ![Foxglove Slam rosbag2](results/screenshots/foxglove/slam_rosbag2.png)
 
-*Foxglove rosbag2 visalization for SLAM Map using topics /aml_pose, global_costmap/costmap, local_costmap/costmap, /map, /scan, /local_plan, /plan.*
+*Foxglove rosbag2 visualization for SLAM Map using topics /amcl_pose, global_costmap/costmap, local_costmap/costmap, /map, /scan, /local_plan, /plan.*
 
 ---
 
@@ -100,6 +100,10 @@ The failure is a **DWB Controller**-layer problem: the global planner finds a ro
 ![RViz Waypoint Following](results/screenshots/nav2/rviz_waypoint_following.png)
 
 *Waypoint sequence set via Nav2 Waypoint Mode in RViz. Every waypoint reached, no recovery behaviors triggered.*
+
+##### Demo Video
+
+*📹 Placeholder — Waypoint Following demo video to be added here.*
 
 ---
 
@@ -179,16 +183,7 @@ ros2 launch nav2_bringup bringup_launch.py \
 python3 waypoint_following/simple_commander_waypoints.py
 ```
 
-Waypoints:
-
-| Waypoint | x | y | yaw | Role |
-|---|---|---|---|---|
-| WP1 | 4.5 | 5.3 | 1.57 | Stage perpendicular to doorway |
-| WP2 | 3.0 | 2.5 | 1.57 | Straight through doorway into room |
-| WP3 | 4.5 | 5.3 | 1.57 | Return to doorway |
-| WP4 | 0.3 | 3.0 | 0.0 | Back to home base |
-
-Full launch details and monitoring setup: [`docs/runs.md`](docs/runs.md)
+Full launch sequence, waypoint table, and monitoring setup: [`docs/runs.md`](docs/runs.md)
 
 ---
 
@@ -229,7 +224,7 @@ ros2-turtlebot3-navigation/
 | **SLAM Toolbox** | Primary SLAM backend — map used for all navigation tests |
 | **Google Cartographer** | Secondary SLAM backend — map generated for learning |
 | **Gazebo Harmonic** | Physics simulation (TurtleBot3 house world) |
-| **Foxglove Studio** | Live dashboard during the Cartographer mapping run |
+| **Foxglove Studio** | Live dashboard (Cartographer) & rosbag2 visualization (SLAM/Nav2) |
 | **rosbag2 / MCAP** | Data recording for SLAM Toolbox & Nav2 runs |
 | **Python 3.12** | Waypoint mission script (Nav2 Simple Commander API) |
 
