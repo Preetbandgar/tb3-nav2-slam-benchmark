@@ -9,15 +9,15 @@
 
 ## 📋 Overview
 
-Autonomous navigation project on TurtleBot3 Waffle in ROS2(Jazzy). Maps were generated using SLAM Toolbox (primary, recorded to rosbag2 MCAP) and Google Cartographer (monitored live via Foxglove). Single-goal and waypoint navigation via RViz confirmed the full stack was working before any constrained environments were attempted.
+Autonomous navigation project on TurtleBot3 Waffle in ROS2 Jazzy. Maps were generated using SLAM Toolbox (primary, recorded to rosbag2 MCAP) and Google Cartographer (monitored live via Foxglove). Single-goal and waypoint navigation via RViz confirmed the full stack was working before any constrained environments were attempted.
 
-A routine demo through a **narrow doorway(approx 0.81m)** failed consistently. Seven systematic tests followed. Tests 01–05 tuned Nav2 parameters — none worked. Test 06 switched to a rectangular footprint and uncovered the **"Letterbox Trap"**: the planner routed through an unsafe gap it geometrically fit through.
+A routine demo through a **0.81m narrow doorway** failed consistently. Seven systematic tests followed. Tests 01–05 tuned Nav2 parameters — none worked. Test 06 switched to a rectangular footprint and uncovered the **"Letterbox Trap"**: the planner routed through an unsafe gap it geometrically fit through.
 
 Test 07 reverted to a circular `robot_radius: 0.15` and decomposed the mission into 4 waypoints via the Nav2 Simple Commander API (`waypoint_following/simple_commander_waypoints.py`). Result: **100% success, zero collisions**.
 
 ---
 
-## 🖼️ Visual Proof
+## 🖼️ Results & Visualization
 
 ### Nav2 Stack — How It's Wired
 
@@ -73,21 +73,9 @@ The failure is a **DWB Controller**-layer problem: the global planner finds a ro
 
 *Cartographer occupancy grid. Learning exercise only.*
 
-#### Foxglove Live Dashboard — Cartographer Map Run
-
-![Foxglove Live Cartographer](results/screenshots/foxglove/cartographer_waypoint_live.png)
-
-*Foxglove live dashboard during Cartographer map using Nav2 Waypoint follower goals (RViz). Panels: 3D map, TF tree, velocity plots.*
-
-#### Foxglove rosbag2 Visualization — SLAM Map run
-
-![Foxglove Slam rosbag2](results/screenshots/foxglove/slam_rosbag2.png)
-
-*Foxglove rosbag2 visualization for SLAM Map using topics /amcl_pose, global_costmap/costmap, local_costmap/costmap, /map, /scan, /local_plan, /plan.*
-
 ---
 
-### 2. Initial Validation — Nav2 Goals and Waypoints via RViz
+### 2. Baseline Validation (using SLAM Toolbox Map)
 
 #### Single Goal — Nav2 Goal (RViz)
 
@@ -105,9 +93,25 @@ The failure is a **DWB Controller**-layer problem: the global planner finds a ro
 
 *📹 Placeholder — Waypoint Following demo video to be added here.*
 
+#### 2.1 Monitoring & Visualization
+
+Both Foxglove visualizations below were captured during Nav2 navigation testing (waypoint following phase).
+
+##### Foxglove Live Dashboard — Cartographer Map
+
+![Foxglove Live Cartographer](results/screenshots/foxglove/cartographer_waypoint_live.png)
+
+*Live Foxglove Bridge during Cartographer map Nav2 waypoint following (RViz). Panels: 3D map, TF tree, velocity plots.*
+
+##### Foxglove rosbag2 Playback — SLAM Toolbox Map
+
+![Foxglove Slam rosbag2](results/screenshots/foxglove/slam_rosbag2.png)
+
+*Foxglove rosbag2 visualization recorded during SLAM Toolbox map Nav2 waypoint following. Topics: /amcl_pose, /global_costmap/costmap, /local_costmap/costmap, /map, /scan, /local_plan, /plan.*
+
 ---
 
-### 3. The Failure — The Letterbox Trap (Test 06)
+### 3. Problem Discovery — The Letterbox Trap (Test 06)
 
 Tests 01–05 tuned parameters. None worked. Test 06 switched to a rectangular footprint `[0.21, 0.165]` — the planner found a gap it geometrically fit through, but the local planner couldn't execute it safely. Goal aborted.
 
@@ -117,7 +121,7 @@ Tests 01–05 tuned parameters. None worked. Test 06 switched to a rectangular f
 
 ---
 
-### 4. The Solution — 4-Waypoint Mission (Test 07)
+### 4. Solution Approach — 4-Waypoint Mission (Test 07)
 
 The rectangular footprint was removed, `robot_radius: 0.15` restored — letterbox gap gone from the costmap. The mission was then decomposed into 4 waypoints via the Nav2 Simple Commander API. Each waypoint is a short, straight-line segment the planner can always handle.
 
