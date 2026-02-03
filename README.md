@@ -157,7 +157,11 @@ ros2 launch slam_toolbox online_sync_launch.py use_sim_time:=True
 ```
 Drive the robot around until the map is complete. Save it:
 ```bash
-ros2 run slam_toolbox lifelong_slam_toolbox --ros-args -p save_map:=results/maps/house_slam_toolbox_draft
+ros2 run nav2_map_server map_saver_cli -f <OUTPUT_PATH_WITHOUT_EXTENSION>
+```
+Example usage:
+```bash
+ros2 run nav2_map_server map_saver_cli -f /media/pritam/Home/tb3-nav2-slam-benchmark/results/maps/house_slam_toolbox_draft
 ```
 
 > **Optional:** Cartographer can also map the same environment. See [`docs/runs.md`](docs/runs.md) for the launch command.
