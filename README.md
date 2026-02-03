@@ -24,37 +24,37 @@ Test 07 reverted to a circular `robot_radius: 0.15` and decomposed the mission i
 The failure is a **DWB Controller**-layer problem: the global planner finds a route, but the local planner can't execute it safely.
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                  Gazebo Simulation                   │
-│             (turtlebot3_house.world)                 │
-└───────────────────────┬─────────────────────────────┘
-                        │  /scan, /odom, /cmd_vel
-                        ▼
-          ┌─────────────────────────┐
-          │        Nav2 Stack       │
-          │                         │
-          │  ┌─────────────────┐    │
-          │  │  AMCL           │    │  ← Localization: "Where am I?"
-          │  │  (localization) │    │     /map + /scan  →  /amcl_pose
-          │  └────────┬────────┘    │
-          │           ▼             │
-          │  ┌─────────────────┐    │
-          │  │  Global Planner │    │  ← Planning: "What's the full route?"
-          │  │  (costmap +     │    │     /map  →  /plan
-          │  │   path search)  │    │
-          │  └────────┬────────┘    │
-          │           ▼             │
-          │  ┌─────────────────┐    │
-          │  │  DWB Controller │◄───┼── ⚠️  Failure point: can't execute
-          │  │  (local planner)│    │     /local_costmap → /local_plan → /cmd_vel
-          │  └─────────────────┘    │
-          └─────────────────────────┘
-                        │
-                        ▼
-              ┌───────────────┐
-              │  Visualization│
-              │  RViz / Foxglove
-              └───────────────┘
+                          ┌─────────────────────────────────────────────────────┐
+                          │                  Gazebo Simulation                  │
+                          │             (turtlebot3_house.world)                │
+                          └───────────────────────┬─────────────────────────────┘
+                                                  │  /scan, /odom, /cmd_vel
+                                                  ▼
+                                     ┌─────────────────────────┐
+                                     │        Nav2 Stack       │
+                                     │                         │
+                                     │  ┌─────────────────┐    │
+                                     │  │  AMCL           │    │  ← Localization: "Where am I?"
+                                     │  │  (localization) │    │     /map + /scan  →  /amcl_pose
+                                     │  └────────┬────────┘    │
+                                     │           ▼             │
+                                     │  ┌─────────────────┐    │
+                                     │  │  Global Planner │    │  ← Planning: "What's the full route?"
+                                     │  │  (costmap +     │    │     /map  →  /plan
+                                     │  │   path search)  │    │
+                                     │  └────────┬────────┘    │
+                                     │           ▼             │
+                                     │  ┌─────────────────┐    │
+                                     │  │  DWB Controller │◄───┼── ⚠️  Failure point: can't execute
+                                     │  │  (local planner)│    │     /local_costmap → /local_plan → cmd_vel  
+                                     │  └─────────────────┘    │
+                                     └─────────────────────────┘
+                                                 │
+                                                 ▼
+                                         ┌───────────────┐
+                                         │  Visualization│
+                                         │RViz / Foxglove│
+                                         └───────────────┘
 ```
 
 ---
