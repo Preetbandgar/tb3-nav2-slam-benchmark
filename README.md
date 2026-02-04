@@ -75,7 +75,7 @@ The failure is a **DWB Controller**-layer problem: the global planner finds a ro
 
 ---
 
-### 2. Baseline Validation (using SLAM Toolbox Map)
+### 2. Baseline Validation
 
 #### Single Goal — Nav2 Goal (RViz)
 

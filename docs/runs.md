@@ -41,7 +41,7 @@ ros2 launch turtlebot3_gazebo turtlebot3_house.launch.py
 You can build a new map or use the existing one in `results/maps/`.
 
 * **To Map:** `ros2 launch slam_toolbox online_sync_launch.py use_sim_time:=True`
-* **To Save:** `ros2 run slam_toolbox lifelong_slam_toolbox --ros-args -p save_map:=results/maps/house_slam_toolbox_draft`
+* **To Save:** `ros2 run nav2_map_server map_saver_cli -f results/maps/house_slam_toolbox_draft`
 
 ### Step 3: Launch Nav2 Stack (Terminal 3)
 
