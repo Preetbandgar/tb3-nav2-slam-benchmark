@@ -91,7 +91,7 @@ The failure is a **DWB Controller**-layer problem: the global planner finds a ro
 
 ##### Demo Video
 
-*📹 Placeholder — Waypoint Following demo video to be added here.*
+*📹Waypoint Following demo video to be added here.*
 
 #### 2.1 Monitoring & Visualization
 
@@ -131,13 +131,13 @@ The rectangular footprint was removed, `robot_radius: 0.15` restored — letterb
 
 #### Demo Video
 
-*📹 Placeholder — full run video to be added here.*
+*📹full run video to be added here.*
 
 #### Test 07 Result
 
 ![Test 07 Result](results/screenshots/nav2/test07_success.png)
 
-*Placeholder — completed mission state in RViz.*
+*Completed mission state in RViz.*
 
 ---
 
