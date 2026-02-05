@@ -85,21 +85,25 @@ The failure is a **DWB Controller**-layer problem: the global planner finds a ro
 
 ### 2. Baseline Validation
 
-#### Single Goal — Nav2 Goal (RViz)
+### Nav2 Single Goal Execution in RViz
 
-![Single Goal RViz](results/screenshots/nav2/single_goal_rviz.png)
+![Nav2 Single Goal – In Progress](results/screenshots/nav2/single_goal_in_progress.png)
 
-*Single goal set via 2D Goal Pose in RViz. Robot reaches it without hesitation.*
+*Single navigation goal sent via the **Nav2 Goal** tool in RViz while the robot is actively navigating.*
+
+![Nav2 Single Goal – Success](results/screenshots/nav2/single_goal_completed.png)
+
+*Successful completion of the Nav2 single-goal navigation in RViz, with the robot reaching the target pose.*
 
 #### Waypoint Following — RViz Waypoint Mode
 
 ![RViz Waypoint Following](results/screenshots/nav2/rviz_waypoint_following.png)
 
-*Waypoint sequence set via Nav2 Waypoint Mode in RViz. Every waypoint reached, no recovery behaviors triggered.*
-
 ##### Demo Video
 
 ![Demo Video](./results/videos/slam_toolbox_waypoint_follower.gif)
+
+*Waypoint sequence set via Nav2 Waypoint Mode in RViz. Every waypoint reached, no recovery behaviors triggered.*
 
 #### 2.1 Monitoring & Visualization
 
