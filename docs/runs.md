@@ -14,7 +14,7 @@ Use this phase to verify that SLAM, localization, and planning are functional in
 2. Click and drag on the map to set the goal position and orientation.
 3. **Observation:** Ensure the **Global Plan** (Green line) and **Local Plan** (Orange line) appear. This is where the initial narrow doorway failures were identified.
 
-### 2. Waypoint Following (RViz Plugin)
+### 2. Waypoint Following (RViz)
 
 1. Ensure the **Nav2 RViz Header** is visible. If not, enable it via `Panels -> Add New Panel -> Nav2 RViz Control`.
 2. Switch to **Waypoint Mode** in the panel.
