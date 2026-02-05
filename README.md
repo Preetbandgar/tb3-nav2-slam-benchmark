@@ -99,7 +99,7 @@ The failure is a **DWB Controller**-layer problem: the global planner finds a ro
 
 ##### Demo Video
 
-*📹Waypoint Following demo video to be added here.*
+![Demo Video](./results/videos/slam_toolbox_waypoint_follower.gif)
 
 #### 2.1 Monitoring & Visualization
 
@@ -133,13 +133,9 @@ Tests 01–05 tuned parameters. None worked. Test 06 switched to a rectangular f
 
 The rectangular footprint was removed, `robot_radius: 0.15` restored — letterbox gap gone from the costmap. The mission was then decomposed into 4 waypoints via the Nav2 Simple Commander API.
 
-![Waypoint Mission Plan](results/screenshots/nav2/waypoint_mission_path.png)
-
-*Test 07: all 4 waypoints(using Nav2 Simple Commander API) reached as shown in Terminal and RViz*
-
 #### Demo Video
 
-*📹 full run video to be added here.*
+![Demo Video](./results/videos/test_07.gif)
 
 #### Test 07 Result
 
