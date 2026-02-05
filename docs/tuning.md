@@ -37,7 +37,7 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
 * **Params:** `inflation_radius: 0.5`, `cost_scaling_factor: 15.0`
 * **Result:** Robot aborted near doorway — inflation covered the doorway; no feasible trajectory.
 
-![Test 01](results/screenshots/tuning/test_01.png)
+![Test 01](/results/screenshots/tuning/test_01.png)
 *Test 01 costmap at doorway.*
 
 ### Test 02 — Reduce inflation & increase samples
@@ -45,7 +45,7 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
 * **Params:** `inflation_radius: 0.3`, `cost_scaling_factor: 4.0`, `vx_samples: 40`
 * **Result:** Still failed — smaller inflation alone did not yield viable trajectories.
 
-![Test 02](results/screenshots/tuning/test_02.png)
+![Test 02](/results/screenshots/tuning/test_02.png)
 *Test 02 costmap at doorway.*
 
 ### Test 03 — Aggressive goal-seeking
@@ -53,7 +53,7 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
 * **Params:** `cost_scaling_factor: 1.0`, `PathDist.scale: 20.0`, `GoalDist.scale: 40.0`, `BaseObstacle.scale: 0.02`
 * **Result:** Still failed — increasing goal bias did not help because all through-doorway trajectories exceeded acceptable obstacle cost.
 
-![Test 03](results/screenshots/tuning/test_03.png)
+![Test 03](/results/screenshots/tuning/test_03.png)
 *Test 03 costmap at doorway.*
 
 ### Test 04 — Sharpen localization & A* planner
@@ -61,7 +61,7 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
 * **Params:** decreased AMCL odometry noise (`alpha1`–`alpha4` from 0.2 → 0.1), `use_astar: true`
 * **Result:** No improvement — pose estimate was sufficient; failure was geometric/planning-related, not localization. A* planner didn't change the outcome.
 
-![Test 04](results/screenshots/tuning/test_04.png)
+![Test 04](/results/screenshots/tuning/test_04.png)
 *Test 04 costmap at doorway.*
 
 ### Test 05 — Shrink robot radius (unsafe)
@@ -69,7 +69,7 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
 * **Params:** `robot_radius: 0.13` (was 0.15), `use_astar: true`
 * **Result:** Collision — radius smaller than actual robot geometry. This established a safety floor: **do not set radius < 0.15 m** for the Waffle.
 
-![Test 05](results/screenshots/tuning/test_04.png)
+![Test 05](/results/screenshots/tuning/test_04.png)
 *Test 04 & 05 share the same screenshot — both tests used `use_astar: true`. Test 05 collision point.*
 
 **Takeaway:** parameter tuning around the existing configuration could not overcome the geometric cost constraints. The planner needed at least one feasible candidate trajectory; none existed under safe parameter bounds.
@@ -95,7 +95,7 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
 * At execution time, the local DWB planner evaluated obstacle costs at close range and considered the gap unsafe. The robot stalled, backed up, tried alternate approaches, and ultimately aborted — typically after getting within ~2 cm of the letterbox.
 * **Conclusion:** precise footprint geometry allowed the global planner to propose risky routes that the local planner rejected. Increased geometric accuracy exposed a mismatch between global and local planning safety models.
 
-![Test 06 — Letterbox Trap](results/screenshots/tuning/letterbox_trap.png)
+![Test 06 — Letterbox Trap](/results/screenshots/tuning/letterbox_trap.png)
 *Test 06: robot near the letterbox gap after spin-backup-retry. The global plan routed through the gap; the local planner refused.*
 
 **Lesson:** exact robot geometry can create marginal paths that are *geometrically feasible* but *practically unsafe* due to local cost interpretations. Geometric precision ≠ operational safety.
@@ -141,7 +141,7 @@ nav.followWaypoints(waypoints)
 * **Repeatability:** consistent across multiple trials.
 * **Operational note:** parameters are conservative and retain robust behavior in open areas as well.
 
-![Test 07](results/screenshots/nav2/test07_success.png)
+![Test 07](/results/screenshots/nav2/test07_success.png)
 *Test 07 completed mission state in RViz.*
 
 ---
@@ -173,7 +173,7 @@ nav.followWaypoints(waypoints)
 * `runs.md` — How to launch and run the benchmark.
 * `setup.md` — Environment setup and dependencies.
 * `troubleshooting.md` — Additional troubleshooting steps and common fixes.
-
+s
 ---
 
 ## Notes / provenance
