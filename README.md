@@ -11,7 +11,7 @@
 
 Autonomous navigation project on TurtleBot3 Waffle in ROS2 Jazzy. Maps were generated using SLAM Toolbox (primary, recorded to rosbag2 MCAP) and Google Cartographer (monitored live via Foxglove). Single-goal and waypoint navigation via RViz confirmed the full stack was working before any constrained environments were attempted.
 
-A routine demo through a **0.81m narrow doorway** failed consistently. Seven systematic tests followed. Tests 01–05 tuned Nav2 parameters — none worked. Test 06 switched to a rectangular footprint and uncovered the **"Letterbox Trap"**: the planner routed through an unsafe gap it geometrically fit through.
+A routine demo through a **narrow doorway(approx. 0.81 m)** failed consistently. Seven systematic tests followed. Tests 01–05 tuned Nav2 parameters — none worked. Test 06 switched to a rectangular footprint and uncovered the **"Letterbox Trap"**: the planner routed through an unsafe gap it geometrically fit through.
 
 Test 07 reverted to a circular `robot_radius: 0.15` and decomposed the mission into 4 waypoints via the Nav2 Simple Commander API (`waypoint_following/simple_commander_waypoints.py`). Result: **100% success, zero collisions**.
 

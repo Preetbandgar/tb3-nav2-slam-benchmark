@@ -25,7 +25,7 @@ Use this phase to verify that SLAM, localization, and planning are functional in
 
 ## 🤖 Phase 2: Autonomous Mission (4-Step Launch)
 
-This sequence executes the **4-Waypoint Decomposition** strategy using the Simple Commander API to solve the 0.81m doorway constraint.
+This sequence executes the **4-Waypoint Decomposition** strategy using the Simple Commander API to solve the narrow doorway(approx. 0.81 m) constraint.
 
 ### Step 1: Launch Simulation (Terminal 1)
 

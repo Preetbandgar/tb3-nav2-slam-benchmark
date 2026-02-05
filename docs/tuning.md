@@ -1,6 +1,6 @@
-# 🔬 Tuning Log — Narrow Doorway (0.81 m): Parameter Tuning → Letterbox Trap → Behavior Solution
+# 🔬 Tuning Log — Narrow Doorway (approx. 0.81 m): Parameter Tuning → Letterbox Trap → Behavior Solution
 
-This document records a focused investigation (7 tests) to solve one problem: **getting a TurtleBot3 Waffle reliably through a 0.81 m doorway** in simulation.
+This document records a focused investigation (7 tests) to solve one problem: **getting a TurtleBot3 Waffle reliably through a narrow doorway(approx. 0.81 m)** in simulation.
 Short story: parameter tweaks (tests 01–05) failed. A geometry change (test 06) exposed a new failure mode ("Letterbox Trap"). A behavioral fix (test 07: circular radius + 4-waypoint mission) solved the problem reproducibly.
 
 ---
