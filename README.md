@@ -59,6 +59,14 @@ The failure is a **DWB Controller**-layer problem: the global planner finds a ro
 
 ---
 
+### Gazebo House World
+
+![Gazebo House World](results/screenshots/gazebo/house_world_topview.png)
+
+*Top-down view of the turtlebot3_house.world in Gazebo Harmonic. The narrow doorway constraint is visible in the central corridor.*
+
+---
+
 ### 1. Mapping — The Foundation
 
 #### SLAM Toolbox Map
@@ -209,6 +217,7 @@ ros2-turtlebot3-navigation/
 │   ├── maps/                    # Generated maps (PGM + YAML)
 │   ├── rosbags/                 # MCAP recordings (SLAM Toolbox & Nav2)
 │   └── screenshots/             # Visual proof
+│       ├── gazebo/              # Gazebo world screenshots
 │       ├── maps/                # SLAM comparison screenshots
 │       ├── tuning/              # Test result screenshots (letterbox trap)
 │       ├── nav2/                # Navigation screenshots (goals, waypoints, solution)

@@ -1,4 +1,4 @@
-# 🔬 Tuning Log — Narrow Doorway (approx. 0.81 m): Parameter Tuning → Letterbox Trap → Behavior Solution
+# 🔬 Tuning Log — Narrow Doorway (0.81 m): Parameter Tuning → Letterbox Trap → Behavior Solution
 
 This document records a focused investigation (7 tests) to solve one problem: **getting a TurtleBot3 Waffle reliably through a narrow doorway(approx. 0.81 m)** in simulation.
 Short story: parameter tweaks (tests 01–05) failed. A geometry change (test 06) exposed a new failure mode ("Letterbox Trap"). A behavioral fix (test 07: circular radius + 4-waypoint mission) solved the problem reproducibly.
@@ -38,7 +38,7 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
 * **Result:** Robot aborted near doorway — inflation covered the doorway; no feasible trajectory.
 
 ![Test 01](results/screenshots/tuning/test_01.png)
-*Placeholder — Test 01 costmap at doorway.*
+*Test 01 costmap at doorway.*
 
 ### Test 02 — Reduce inflation & increase samples
 
@@ -46,7 +46,7 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
 * **Result:** Still failed — smaller inflation alone did not yield viable trajectories.
 
 ![Test 02](results/screenshots/tuning/test_02.png)
-*Placeholder — Test 02 costmap at doorway.*
+*Test 02 costmap at doorway.*
 
 ### Test 03 — Aggressive goal-seeking
 
@@ -54,23 +54,23 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
 * **Result:** Still failed — increasing goal bias did not help because all through-doorway trajectories exceeded acceptable obstacle cost.
 
 ![Test 03](results/screenshots/tuning/test_03.png)
-*Placeholder — Test 03 costmap at doorway.*
+*Test 03 costmap at doorway.*
 
-### Test 04 — Sharpen localization
+### Test 04 — Sharpen localization & A* planner
 
-* **Params:** decreased AMCL odometry noise (`alpha1`–`alpha4` from 0.2 → 0.1)
-* **Result:** No improvement — pose estimate was sufficient; failure was geometric/planning-related, not localization.
+* **Params:** decreased AMCL odometry noise (`alpha1`–`alpha4` from 0.2 → 0.1), `use_astar: true`
+* **Result:** No improvement — pose estimate was sufficient; failure was geometric/planning-related, not localization. A* planner didn't change the outcome.
 
 ![Test 04](results/screenshots/tuning/test_04.png)
-*Placeholder — Test 04 costmap at doorway.*
+*Test 04 costmap at doorway.*
 
 ### Test 05 — Shrink robot radius (unsafe)
 
 * **Params:** `robot_radius: 0.13` (was 0.15), `use_astar: true`
 * **Result:** Collision — radius smaller than actual robot geometry. This established a safety floor: **do not set radius < 0.15 m** for the Waffle.
 
-![Test 05](results/screenshots/tuning/test_05.png)
-*Placeholder — Test 05 collision point.*
+![Test 05](results/screenshots/tuning/test_04.png)
+*Test 04 & 05 share the same screenshot — both tests used `use_astar: true`. Test 05 collision point.*
 
 **Takeaway:** parameter tuning around the existing configuration could not overcome the geometric cost constraints. The planner needed at least one feasible candidate trajectory; none existed under safe parameter bounds.
 
@@ -142,7 +142,7 @@ nav.followWaypoints(waypoints)
 * **Operational note:** parameters are conservative and retain robust behavior in open areas as well.
 
 ![Test 07](results/screenshots/nav2/test07_success.png)
-*Placeholder — Test 07 completed mission state in RViz.*
+*Test 07 completed mission state in RViz.*
 
 ---
 
