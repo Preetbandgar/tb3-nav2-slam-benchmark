@@ -123,15 +123,15 @@ Tests 01–05 tuned parameters. None worked. Test 06 switched to a rectangular f
 
 ### 4. Solution Approach — 4-Waypoint Mission (Test 07)
 
-The rectangular footprint was removed, `robot_radius: 0.15` restored — letterbox gap gone from the costmap. The mission was then decomposed into 4 waypoints via the Nav2 Simple Commander API. Each waypoint is a short, straight-line segment the planner can always handle.
+The rectangular footprint was removed, `robot_radius: 0.15` restored — letterbox gap gone from the costmap. The mission was then decomposed into 4 waypoints via the Nav2 Simple Commander API.
 
 ![Waypoint Mission Plan](results/screenshots/nav2/waypoint_mission_path.png)
 
-*Test 07: all 4 waypoints visible in RViz. Path enters the doorway straight and centered. Every waypoint reached.*
+*Test 07: all 4 waypoints(using Nav2 Simple Commander API) reached as shown in Terminal and RViz*
 
 #### Demo Video
 
-*📹full run video to be added here.*
+*📹 full run video to be added here.*
 
 #### Test 07 Result
 
