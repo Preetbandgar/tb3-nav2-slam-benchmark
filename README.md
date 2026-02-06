@@ -11,7 +11,7 @@
 
 Autonomous navigation project on TurtleBot3 Waffle in ROS2 Jazzy. Maps were generated using SLAM Toolbox (primary, recorded to rosbag2 MCAP) and Google Cartographer (monitored live via Foxglove). Single-goal and waypoint navigation via RViz confirmed the full stack was working before any constrained environments were attempted.
 
-A routine demo through a **narrow doorway(approx. 0.81 m)** failed consistently. Seven systematic tests followed. Tests 01–05 tuned Nav2 parameters — none worked. Test 06 switched to a rectangular footprint and uncovered the **"Letterbox Trap"**: the planner routed through an unsafe gap it geometrically fit through.
+A routine demo through a **narrow doorway(approx. 0.81 m)** failed consistently. Seven systematic tests followed. Tests 01–05 tuned Nav2 parameters — none worked. Test 06 switched to a rectangular footprint and uncovered the **"Mailbox Trap"**: the planner routed through an unsafe gap it geometrically fit through.
 
 Test 07 reverted to a circular `robot_radius: 0.15` and decomposed the mission into 4 waypoints via the Nav2 Simple Commander API (`waypoint_following/simple_commander_waypoints.py`). Result: **100% success, zero collisions**.
 
@@ -123,19 +123,19 @@ Both Foxglove visualizations below were captured during Nav2 navigation testing 
 
 ---
 
-### 3. Problem Discovery — The Letterbox Trap (Test 06)
+### 3. Problem Discovery — The Mailbox Trap (Test 06)
 
 Tests 01–05 tuned parameters. None worked. Test 06 switched to a rectangular footprint `[0.21, 0.165]` — the planner found a gap it geometrically fit through, but the local planner couldn't execute it safely. Goal aborted.
 
-![Letterbox Trap](results/screenshots/tuning/letterbox_trap.png)
+![Mailbox Trap](results/screenshots/tuning/letterbox_trap.png)
 
-*Test 06: rectangular footprint caused the planner to route through an unsafe gap near a letterbox — the "Letterbox Trap." Full breakdown in [`docs/tuning.md`](docs/tuning.md).*
+*Test 06: rectangular footprint caused the planner to route through an unsafe gap near a Mailbox — the "Mailbox Trap." Full breakdown in [`docs/tuning.md`](docs/tuning.md).*
 
 ---
 
 ### 4. Solution Approach — 4-Waypoint Mission (Test 07)
 
-The rectangular footprint was removed, `robot_radius: 0.15` restored — letterbox gap gone from the costmap. The mission was then decomposed into 4 waypoints via the Nav2 Simple Commander API.
+The rectangular footprint was removed, `robot_radius: 0.15` restored — Mailbox gap gone from the costmap. The mission was then decomposed into 4 waypoints via the Nav2 Simple Commander API.
 
 #### Demo Video
 
@@ -155,7 +155,7 @@ The rectangular footprint was removed, `robot_radius: 0.15` restored — letterb
 |---|---|---|---|
 | Initial Validation | Single-goal and RViz waypoint navigation on both SLAM Toolbox and Cartographer maps | All passed | Confirmed the full stack (SLAM → AMCL → Nav2) worked correctly in open areas |
 | Tests 01–05 | Tuned inflation radius, cost scaling, DWB critics, AMCL noise, reduced robot radius to 0.13 | All failed | Parameter tuning cannot create a valid path where geometry forbids one |
-| Test 06 | Switched to precise rectangular footprint `[0.21, 0.165]` | Letterbox Trap | The planner exploited a ~0.2m gap the robot couldn't safely traverse |
+| Test 06 | Switched to precise rectangular footprint `[0.21, 0.165]` | Mailbox Trap | The planner exploited a ~0.2m gap the robot couldn't safely traverse |
 | Test 07 | Reverted to circular `robot_radius: 0.15` + 4-waypoint script | **100% success** | Mission-level decomposition solved what local planner tuning could not |
 
 ---
@@ -219,7 +219,7 @@ ros2-turtlebot3-navigation/
 │   └── screenshots/             # Visual proof
 │       ├── gazebo/              # Gazebo world screenshots
 │       ├── maps/                # SLAM comparison screenshots
-│       ├── tuning/              # Test result screenshots (letterbox trap)
+│       ├── tuning/              # Test result screenshots (mailbox trap)
 │       ├── nav2/                # Navigation screenshots (goals, waypoints, solution)
 │       └── foxglove/            # Foxglove dashboard screenshots
 └── waypoint_following/

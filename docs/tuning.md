@@ -1,7 +1,7 @@
-# 🔬 Tuning Log — Narrow Doorway (0.81 m): Parameter Tuning → Letterbox Trap → Behavior Solution
+# 🔬 Tuning Log — Narrow Doorway (0.81 m): Parameter Tuning → Mailbox Trap → Behavior Solution
 
 This document records a focused investigation (7 tests) to solve one problem: **getting a TurtleBot3 Waffle reliably through a narrow doorway(approx. 0.81 m)** in simulation.
-Short story: parameter tweaks (tests 01–05) failed. A geometry change (test 06) exposed a new failure mode ("Letterbox Trap"). A behavioral fix (test 07: circular radius + 4-waypoint mission) solved the problem reproducibly.
+Short story: parameter tweaks (tests 01–05) failed. A geometry change (test 06) exposed a new failure mode ("Mailbox Trap"). A behavioral fix (test 07: circular radius + 4-waypoint mission) solved the problem reproducibly.
 
 ---
 
@@ -76,7 +76,7 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
 
 ---
 
-## Phase 2 — Geometric attempt (Test 06): the **Letterbox Trap**
+## Phase 2 — Geometric attempt (Test 06): the **Mailbox Trap**
 
 ### Test 06 — Precise rectangular footprint
 
@@ -89,14 +89,14 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
   ```
 * **Intended effect:** reduce conservative padding by modeling the robot's true shape; enable planned paths that the circular footprint would forbid.
 
-### Actual behavior — the Letterbox Trap
+### Actual behavior — the Mailbox Trap
 
-* The global planner computed a path that threaded the robot through a narrow lateral gap near the doorway (between a wall and a letterbox). Geometrically, the rectangular footprint fit through that gap, so the global plan was accepted.
-* At execution time, the local DWB planner evaluated obstacle costs at close range and considered the gap unsafe. The robot stalled, backed up, tried alternate approaches, and ultimately aborted — typically after getting within ~2 cm of the letterbox.
+* The global planner computed a path that threaded the robot through a narrow lateral gap near the doorway (between a wall and a Mailbox). Geometrically, the rectangular footprint fit through that gap, so the global plan was accepted.
+* At execution time, the local DWB planner evaluated obstacle costs at close range and considered the gap unsafe. The robot stalled, backed up, tried alternate approaches, and ultimately aborted — typically after getting within ~2 cm of the Mailbox.
 * **Conclusion:** precise footprint geometry allowed the global planner to propose risky routes that the local planner rejected. Increased geometric accuracy exposed a mismatch between global and local planning safety models.
 
-![Test 06 — Letterbox Trap](/results/screenshots/tuning/letterbox_trap.png)
-*Test 06: robot near the letterbox gap after spin-backup-retry. The global plan routed through the gap; the local planner refused.*
+![Test 06 — Mailbox Trap](/results/screenshots/tuning/letterbox_trap.png)
+*Test 06: robot near the Mailbox gap after spin-backup-retry. The global plan routed through the gap; the local planner refused.*
 
 **Lesson:** exact robot geometry can create marginal paths that are *geometrically feasible* but *practically unsafe* due to local cost interpretations. Geometric precision ≠ operational safety.
 
@@ -114,7 +114,7 @@ Before the doorway tests, the full Nav2 stack was verified for open-area navigat
    BaseObstacle.scale: 0.08
    ```
 
-   * The circular footprint excludes tiny lateral gaps (like the letterbox), preventing the global planner from considering those risky shortcuts.
+   * The circular footprint excludes tiny lateral gaps (like the Mailbox), preventing the global planner from considering those risky shortcuts.
 
 2. **Decompose the mission into 4 simple waypoints** (short, straight segments) to avoid planner ambiguity and reduce the complexity of any single planning step.
 
@@ -152,7 +152,7 @@ nav.followWaypoints(waypoints)
 | ---------------------------------------- | --------: | ------------------------ | ---------------------------------------------------------------------------------- |
 | Single-goal RViz waypoints (open areas)  | Pre-tests | Succeeded                | Nav2 stack healthy in open areas                                                   |
 | Parameter tuning                         |     01–05 | Failed                   | Doorway geometrically impassable for local planner within safe params              |
-| Precise rectangular footprint            |        06 | Failure (Letterbox Trap) | Global/local planner mismatch on marginal gaps                                     |
+| Precise rectangular footprint            |        06 | Failure (Mailbox Trap) | Global/local planner mismatch on marginal gaps                                     |
 | Circular radius + waypoint decomposition |        07 | ✅ Success                | Waypoints + conservative radius avoid marginal gaps and yield repeatable execution |
 
 **Key insight:** Not all navigation problems are solved by parameter tuning. Some require mission structuring (behavioral decomposition) and conservative safety buffers.

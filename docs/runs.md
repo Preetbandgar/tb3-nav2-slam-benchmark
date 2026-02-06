@@ -85,7 +85,7 @@ ros2 run foxglove_bridge foxglove_bridge
 
 ### 2. Post-Process Analysis (SLAM/Nav2)
 
-Recorded using **rosbag2 (MCAP)** to analyze the "Letterbox Trap" and local planner failures.
+Recorded using **rosbag2 (MCAP)** to analyze the "Mailbox Trap" and local planner failures.
 
 ```bash
 ros2 bag record -s mcap \
