@@ -137,7 +137,7 @@ Tests 01–05 tuned parameters. None worked. Test 06 switched to a rectangular f
 
 The rectangular footprint was removed, `robot_radius: 0.15` restored — Mailbox gap gone from the costmap. The mission was then decomposed into 4 waypoints via the Nav2 Simple Commander API.
 
-#### Demo Video
+#### Demo Video (8× Playback Speed)
 
 ![Demo Video](./results/videos/test_07.gif)
 
